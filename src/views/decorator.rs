@@ -5,6 +5,7 @@ use crate::{
     action::{set_window_menu, set_window_title, update_window_scale},
     animate::Animation,
     event::{Event, EventListener},
+    id::Id,
     menu::Menu,
     style::{Style, StyleClass, StyleSelector},
     view::View,
@@ -98,12 +99,26 @@ pub trait Decorators: View + Sized {
         self
     }
 
-    fn disabled(self, disabled_fn: impl Fn() -> bool + 'static) -> Self {
+    fn disabled(self, disabled_fn: impl Fn() -> bool + 'static) -> Self
+    where
+        Self: 'static,
+    {
         let id = self.id();
 
         create_effect(move |_| {
+            fn collect_ids_recursively(view: &dyn View) -> Vec<Id> {
+                let mut ids = Vec::new();
+                view.for_each_child(&mut |inner_view| {
+                    ids.push(inner_view.id());
+                    ids.extend(collect_ids_recursively(inner_view));
+                    true
+                });
+                ids
+            }
+
             let is_disabled = disabled_fn();
-            id.update_disabled(is_disabled);
+            let child_ids = collect_ids_recursively(&self);
+            id.update_disabled(is_disabled, child_ids);
         });
 
         self

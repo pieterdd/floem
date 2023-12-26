@@ -36,6 +36,7 @@ pub(crate) enum UpdateMessage {
     Disabled {
         id: Id,
         is_disabled: bool,
+        descendant_ids: Vec<Id>,
     },
     RequestChange {
         id: Id,

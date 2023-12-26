@@ -406,6 +406,32 @@ impl AppState {
             .unwrap_or(false)
     }
 
+    pub(crate) fn propagate_disabled_state_change(&mut self, id: Id, is_disabled: bool) {
+        if is_disabled {
+            self.disabled.insert(id);
+            self.hovered.remove(&id);
+        } else if self.inherits_disabled_state(&id) {
+            self.disabled.insert(id);
+            self.hovered.remove(&id);
+        } else {
+            self.disabled.remove(&id);
+        }
+    }
+
+    fn inherits_disabled_state(&self, id: &Id) -> bool {
+        let parent = id.parent();
+        match parent {
+            None => false,
+            Some(parent_value) => {
+                if self.disabled.contains(&parent_value) {
+                    return true;
+                }
+
+                self.inherits_disabled_state(&parent_value)
+            }
+        }
+    }
+
     pub fn get_interact_state(&self, id: &Id) -> InteractionState {
         InteractionState {
             is_hovered: self.is_hovered(id),

@@ -765,12 +765,18 @@ impl WindowHandle {
                             cx.app_state.request_style_recursive(id);
                         }
                     }
-                    UpdateMessage::Disabled { id, is_disabled } => {
-                        if is_disabled {
-                            cx.app_state.disabled.insert(id);
-                            cx.app_state.hovered.remove(&id);
-                        } else {
-                            cx.app_state.disabled.remove(&id);
+                    UpdateMessage::Disabled {
+                        id,
+                        is_disabled,
+                        descendant_ids,
+                    } => {
+                        cx.app_state
+                            .propagate_disabled_state_change(id, is_disabled);
+                        for descendant_id in descendant_ids.into_iter() {
+                            cx.app_state.propagate_disabled_state_change(
+                                descendant_id,
+                                cx.app_state.disabled.contains(&descendant_id),
+                            );
                         }
                         cx.app_state.request_style_recursive(id);
                     }

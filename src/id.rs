@@ -118,10 +118,11 @@ impl Id {
         self.add_update_message(UpdateMessage::Active(*self));
     }
 
-    pub fn update_disabled(&self, is_disabled: bool) {
+    pub fn update_disabled(&self, is_disabled: bool, child_ids: Vec<Id>) {
         self.add_update_message(UpdateMessage::Disabled {
             id: *self,
             is_disabled,
+            descendant_ids: child_ids,
         });
     }
 
