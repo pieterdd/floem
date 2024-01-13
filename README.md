@@ -1,6 +1,6 @@
 <div align="center">
 
-# Floem
+![Floem](docs/img/logo_300.png)
 
 A native Rust UI library with fine-grained reactivity
 
