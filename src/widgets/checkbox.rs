@@ -4,6 +4,7 @@ use crate::{
     views::{self, h_stack, svg, Decorators},
 };
 use floem_reactive::ReadSignal;
+use floem_winit::keyboard::{Key, ModifiersState, NamedKey};
 use std::fmt::Display;
 
 style_class!(pub CheckboxClass);
@@ -18,8 +19,22 @@ fn checkbox_svg(checked: ReadSignal<bool>) -> impl View {
 
 /// Renders a checkbox the provided checked signal.
 /// Can be combined with a label and a stack with a click event (as in `examples/widget-gallery`).
-pub fn checkbox(checked: ReadSignal<bool>) -> impl View {
-    checkbox_svg(checked).keyboard_navigatable()
+pub fn checkbox(
+    checked: ReadSignal<bool>,
+    on_update: impl Fn(bool) -> () + Copy + 'static,
+) -> impl View {
+    checkbox_svg(checked)
+        .keyboard_navigatable()
+        .on_click_stop(move |_| {
+            on_update(!checked.get());
+        })
+        .on_key_down(
+            Key::Named(NamedKey::Enter),
+            ModifiersState::empty(),
+            move |_| {
+                on_update(!checked.get());
+            },
+        )
 }
 
 /// Renders a checkbox using the provided checked signal.
